@@ -3,6 +3,7 @@ members = [
     "core-layer/mitm_http-server",
     "core-layer/mitm_scheduler-server",
     "core-layer/mitm_iam-server",
+    "transformation-layer/mitm_transformer",
     "delivery-layer/mitm_apigee",
     "delivery-layer/mitm_cority",
     "maintenance-layer/mitm_cleanup"
