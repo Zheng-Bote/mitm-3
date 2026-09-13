@@ -59,10 +59,10 @@
 ## 7. Security and Key Management
 
 - **Envelope Encryption:** Each fragment gets a generated DEK. The DEK is encrypted with the Master Key (KEK).
-- **MasterKey Handling:** **The KEK must never be persisted to disk**. The root Scheduler retrieves it into RAM and securely injects it and database credentials to sub-processes (Go collectors, Rust modules) via a bidirectional Unix Domain Socket (IPC). Child processes never inherit environment variables.
-- **AuthN/AuthZ:** External IdP or internal OAuth2 API via `mitm_iam-server`. MFA enforced. Access tokens (JWT) used for internal API communication.
+- **MasterKey Handling:** **The KEK must never be persisted to disk**. Memory locking (`mlock` via secrecy crates) and zeroization MUST be applied to prevent swap leakage. The root Scheduler retrieves it into RAM and securely injects it and database credentials to sub-processes (Go collectors, Rust modules) via a bidirectional Unix Domain Socket (IPC). Child processes never inherit environment variables.
+- **AuthN/AuthZ:** External IdP or internal OAuth2 API via `mitm_iam-server`. Passwords MUST be hashed using Argon2. MFA enforced. Access tokens (JWT) used for internal API communication.
 - **TLS:** All external connections enforce TLS 1.2+.
-- **Audit:** An audit log records key rotations, app starts, and failed authentication attempts.
+- **Audit:** An append-only audit log records key rotations, app starts, and failed authentication attempts. It uses cryptographic hash-chaining to guarantee tamper-evidence for Medical Device regulatory compliance.
 
 ## 8. Toolchain and Libraries
 
@@ -79,7 +79,7 @@
 | **Schema Drift of Sources** | Versioned Go collectors; robust fallbacks; DLQ on parsing errors. |
 | **SaaS Rate Limits** | Politeness delays and exponential backoff in Rust Delivery components. |
 | **Architecture Drift** | Flow-Forward workflow with SpecDD linting and GitHub Spec Kit. |
-| **PostgreSQL Concurrency** | Use a connection pool (e.g., pgxpool, sqlx pool) and configure appropriate connection limits. |
+| **PostgreSQL Concurrency** | Use a connection pool (e.g., pgxpool, sqlx pool), configure appropriate connection limits, and enforce `SELECT ... FOR UPDATE SKIP LOCKED` for fragment queue processing. |
 
 ---
 

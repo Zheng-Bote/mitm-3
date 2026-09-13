@@ -10,6 +10,10 @@ Must:
   - Encrypt PII via AES-GCM (Envelope Encryption).
   - Retrieve Master Key (KEK) dynamically via IPC Unix Socket.
   - Never store Master Key on disk.
+  - Lock Master Key (KEK) in memory (e.g., using mlock or secrecy crates) and zeroize on drop to prevent swap file leakage.
+  - Use `SELECT ... FOR UPDATE SKIP LOCKED` in PostgreSQL for concurrent queue processing to prevent worker deadlocks.
+  - Hash any passwords handled by the system using Argon2 with a strong work factor.
+  - Maintain the Audit Log as an append-only, tamper-evident (hash-chained) structure to ensure Medical Device compliance (FDA/MDR).
   - Compile each layer component as a standalone binary (Go binary or Rust binary).
   - Use English for all code documentation and comments.
   - Include standardized SPDX header with Apache-2.0 license in each source file.

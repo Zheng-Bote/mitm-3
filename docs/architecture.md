@@ -296,10 +296,11 @@ graph TD
 
 ## Security & Key Management
 
-- **Envelope Encryption:** KEK (MasterKey) resides only in RAM. DEKs are stored encrypted in the DB.
+- **Envelope Encryption:** KEK (MasterKey) resides only in RAM. Memory locking (`mlock`) and zeroization upon drop MUST be enforced to prevent the key from leaking into disk swap space. DEKs are stored encrypted in the DB.
 - **IPC Secrets Broker:** The Scheduler securely distributes the KEK and database credentials to isolated sub-processes exclusively via bidirectional Unix Domain Sockets (`.sock`). Environment variables are intentionally scrubbed to prevent leakage.
-- **Atomic Operations:** All data ingestion and cursor progressions are guaranteed atomic using strict PostgreSQL transactions, ensuring robust at-least-once delivery semantics.
+- **Atomic Operations:** All data ingestion and cursor progressions are guaranteed atomic using strict PostgreSQL transactions. Queue workers MUST utilize `SELECT ... FOR UPDATE SKIP LOCKED` to allow high concurrency without deadlocks.
 - **TLS & Identity:** HTTPS for all external calls. Internal administrative HTTP endpoints (`mitm_http-server`) enforce strict Authentication via JWT tokens provided by the `mitm_iam-server`.
+- **Password Hashing:** Any passwords stored or handled internally MUST be cryptographically hashed using Argon2 with a strong work factor.
 - **ABAC/RBAC:** `mitm_iam-server` enforces fine-grained authorization (e.g., users can only see PII of their specific tenant).
 - **Least Privilege:** Containers run as non-root users with restricted filesystem permissions.
 
@@ -307,7 +308,7 @@ graph TD
 
 - **Logging:** Structured JSON logging (stdout for Docker log drivers).
 - **Metrics:** Prometheus exporter for fragment counters, package sizes, and API latencies.
-- **Audit Log:** Immutable table in PostgreSQL for critical actions (admin access, key rotation).
+- **Audit Log:** Immutable, append-only table in PostgreSQL for critical actions (admin access, key rotation). For Medical Device compliance (FDA/MDR), the log implements cryptographic hash-chaining (tamper-evident).
 
 # 9. Architectural Decisions
 
