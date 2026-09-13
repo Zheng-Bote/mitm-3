@@ -1,0 +1,15 @@
+Spec: mitm-3
+
+Purpose:
+  Architecture Specification and single source of truth for the mitm-3 project.
+
+Must:
+  - Use GitHub Spec Kit (Flow-Forward Spec) for feature development.
+  - Configure Schichtuebergreifende Features (Cross-layer) in specs/features/<feature-name>/ in the root repository.
+  - Configure Isolierte Features (Isolated) in specs/ folder within the respective component (e.g. delivery-layer/mitm_apigee/specs/).
+  - Encrypt PII via AES-GCM (Envelope Encryption).
+  - Retrieve Master Key (KEK) dynamically via IPC Unix Socket.
+  - Never store Master Key on disk.
+  - Compile each layer component as a standalone binary (Go binary or Rust binary).
+  - Use English for all code documentation and comments.
+  - Include standardized SPDX header with Apache-2.0 license in each source file.
