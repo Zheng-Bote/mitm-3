@@ -1,0 +1,7 @@
+admin-frontend/
+collector-layer/
+core-layer/
+delivery-layer/
+maintenance-layer/
+target/
+transformation-layer/
