@@ -3,8 +3,10 @@
 </p>
 
 ---
+
 date: September 2026
 title: "Architectural Concept: MitM-3 Data Aggregator"
+
 ---
 
 # Architectural Concept: MitM-3 Data Aggregator
@@ -24,12 +26,10 @@ title: "Architectural Concept: MitM-3 Data Aggregator"
 - [4. Solution Strategy](#4-solution-strategy)
 - [5. Building Block View](#5-building-block-view)
   - [Whitebox Overall System](#whitebox-overall-system)
+    - [Admin Pane](#admin-pane)
     - [Core-Layer (Control \& Auth)](#core-layer-control--auth)
-    - [Admin Frontend (UI)](#admin-frontend-ui)
-    - [Collector-Layer](#collector-layer)
-    - [Transformation-Layer](#transformation-layer)
-    - [Delivery-Layer](#delivery-layer)
-    - [State \& Storage](#state--storage)
+    - [MitM-3 Aggregator Layers](#mitm-3-aggregator-layers)
+    - [Storage \& Maintenance](#storage--maintenance)
 - [6. Runtime View](#6-runtime-view)
   - [Daily Workflow](#daily-workflow)
 - [7. Deployment View](#7-deployment-view)
@@ -60,21 +60,21 @@ Provision of a reliable, secure, and decoupled system (Man-in-the-Middle Aggrega
 
 ## Quality Goals
 
-| Goal | Description |
-| :--- | :--- |
-| **Security (Data Privacy)** | Protection of PII data "at-rest" using AES-GCM Envelope Encryption (KEK/DEK). |
-| **Resilience** | Fault tolerance against failures of the SaaS or source systems using retries and cursors. |
-| **Maintainability** | Modular design (Adapter pattern) for easy integration of new sources. |
-| **Traceability** | Complete audit logging of security-relevant and process events. |
+| Goal                        | Description                                                                               |
+| :-------------------------- | :---------------------------------------------------------------------------------------- |
+| **Security (Data Privacy)** | Protection of PII data "at-rest" using AES-GCM Envelope Encryption (KEK/DEK).             |
+| **Resilience**              | Fault tolerance against failures of the SaaS or source systems using retries and cursors. |
+| **Maintainability**         | Modular design (Adapter pattern) for easy integration of new sources.                     |
+| **Traceability**            | Complete audit logging of security-relevant and process events.                           |
 
 ## Stakeholders
 
-| Role | Expectation |
-| :--- | :--- |
-| **IT Architect** | Clean technological separation, compliance with security standards, SpecDD compliance. |
-| **Security Officer** | Encryption of PII data, secure key handling (MasterKey is not persistent). ABAC data isolation. |
-| **Operations Team (Admins)** | Simple deployment (containers), clear monitoring (Prometheus), logging (JSON). |
-| **SaaS Provider** | Compliance with rate limits, correct JSON structures, idempotency. |
+| Role                         | Expectation                                                                                     |
+| :--------------------------- | :---------------------------------------------------------------------------------------------- |
+| **IT Architect**             | Clean technological separation, compliance with security standards, SpecDD compliance.          |
+| **Security Officer**         | Encryption of PII data, secure key handling (MasterKey is not persistent). ABAC data isolation. |
+| **Operations Team (Admins)** | Simple deployment (containers), clear monitoring (Prometheus), logging (JSON).                  |
+| **SaaS Provider**            | Compliance with rate limits, correct JSON structures, idempotency.                              |
 
 # 2. Constraints
 
@@ -183,10 +183,10 @@ flowchart TD
     WebUI -->|REST API| Http
     MTA -->|REST API| Http
     Http <-->|Auth Check| IAM
-    
+
     %% Flow Core to Aggregator
     Sched -->|Control / Start| Collector
-    
+
     %% Flow within Aggregator
     CollCSV --> Transform
     CollAPI --> Transform
@@ -206,6 +206,7 @@ flowchart TD
 ### Admin Pane
 
 Consists of three clients serving as the visual control plane for administrators to configure mappings, schedule jobs, and monitor logs:
+
 - **Desktop Frontend:** A native Qt6/C++23 application (branch `mitm-3_v2.xx`).
 - **Web Frontend:** A modern web application built with Angular 22.
 - **MTA:** An additional MTA Desktop Frontend application built with Qt6/C++23.
@@ -213,6 +214,7 @@ Consists of three clients serving as the visual control plane for administrators
 ### Core-Layer (Control & Auth)
 
 Located in `core-layer/`. Consists of Rust 2024 applications:
+
 - **mitm_http-server:** Exposes the REST API for the Admin Pane using domain-driven versioning.
 - **mitm_scheduler-server:** Responsible for starting and orchestrating the collectors and triggering deliveries.
 - **mitm_iam-server:** Manages Identity and Access (AuthN/AuthZ) providing OIDC/OAuth2, RBAC, and ABAC.
@@ -309,7 +311,7 @@ graph TD
 
 # 9. Architectural Decisions
 
-- **Hybrid Tech Stack (Rust/Go):** Transitioned to Rust 2024 for Core and Delivery layers to leverage its memory safety, concurrency, and performance while retaining Go for data parsing (Collectors) and transformations due to established stability.
+- **Hybrid Tech Stack (Rust/Go):** Transitioned to Rust 2024 for Core, Transformation layer and Delivery layers to leverage its memory safety, concurrency, and performance while retaining Go for data parsing (Collectors) due to established stability.
 - **PostgreSQL instead of SQLite:** Chosen to support high-concurrency environments, robust connection management, and better scalability, while ensuring transactional safety and reliability.
 - **Stateless App / Stateful Storage:** The apps themselves can be restarted at any time; the entire state resides in the PostgreSQL database.
 - **SpecDD Framework:** Architectural constraints and drift control are governed by SpecDD (`.sdd` files).
@@ -347,11 +349,18 @@ flowchart TD
 
 # 13. Glossary
 
-| Term | Definition |
-| :--- | :--- |
-| **Fragment** | Smallest unit of data from a source (e.g., a row of a CSV). |
-| **Package** | Aggregation of multiple fragments into a JSON document for SaaS delivery. |
-| **KEK** | Key Encryption Key (Master Key). |
-| **DEK** | Data Encryption Key (per fragment). |
-| **DLQ** | Dead Letter Queue (storage for permanently failed records). |
-| **ABAC** | Attribute-Based Access Control. |
+| Term         | Definition                                                                                                                                       |
+| :----------- | :----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Fragment** | Smallest unit of data from a source (e.g., a row of a CSV).                                                                                      |
+| **Package**  | Aggregation of multiple fragments into a JSON document for SaaS delivery.                                                                        |
+| **KEK**      | Key Encryption Key (Master Key).                                                                                                                 |
+| **DEK**      | Data Encryption Key (per fragment).                                                                                                              |
+| **DLQ**      | Dead Letter Queue (storage for permanently failed records).                                                                                      |
+| **ABAC**     | Attribute-Based Access Control.                                                                                                                  |
+| **RBAC**     | Role-Based Access Control.                                                                                                                       |
+| **MTA**      | Medical-technical assistance (Desktop frontend for medical devices)                                                                              |
+| **OIDC**     | OpenID Connect.                                                                                                                                  |
+| **OAuth2**   | Open Authorization.                                                                                                                              |
+| **JWT**      | JSON Web Token.                                                                                                                                  |
+| **SDD**      | Spec Driven Development. Using a domain-specific language to define system constraints, architectural patterns, and architectural drift control. |
+| **ADR**      | Architecture Decision Record. A document that records a significant architectural decision, its context, and its consequences.                   |
