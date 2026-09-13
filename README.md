@@ -30,7 +30,7 @@ flowchart TB
             Sched["mitm_scheduler-server"]
             IAM["mitm_iam-server"]
         end
-        
+
         collector["Collector-Layer<br/>(Go Standalone Collectors)"]
         transformer["Transformation-Layer<br/>(Rust Mapping & Validation)"]
         delivery["Delivery-Layer<br/>(Rust Apigee/Cority Senders)"]
@@ -71,21 +71,27 @@ flowchart TB
 ## 📂 Project Structure & Layers
 
 ### 1. Core Layer (Rust)
-- **Role**: Contains `mitm_http-server` (Permanent API), `mitm_scheduler-server` (Orchestrator), and `mitm_iam-server` (AuthN/AuthZ). 
+
+- **Role**: Contains `mitm_http-server` (Permanent API), `mitm_scheduler-server` (Orchestrator), and `mitm_iam-server` (AuthN/AuthZ).
 
 ### 2. Collector Layer (Go)
+
 - **Role**: Autonomous collectors that connect to source systems, fetch raw data, apply initial AES-GCM envelope encryption, and insert them into the DB.
 
 ### 3. Transformation Layer (Rust)
-- **Role**: Reads raw ingested records, decrypts them, applies mapping configurations, dynamic transformations, and validations, and writes target output fields to target tables. *(Maintained in branch `mitm-3_v2.xx`)*.
+
+- **Role**: Reads raw ingested records, decrypts them, applies mapping configurations, dynamic transformations, and validations, and writes target output fields to target tables. _(Maintained in branch `mitm-3_v2.xx`)_.
 
 ### 4. Delivery Layer (Rust)
+
 - **Role**: Aggregates target records into daily JSON batches (`packages`), executes secure delivery with HTTP idempotency key headers, handles transient errors via exponential backoff. Separated into `mitm_apigee` and `mitm_cority`.
 
 ### 5. Admin Pane (C++/Web)
+
 - **Role**: Desktop (Qt6/C++23) and Web (Angular 22) applications for managing configurations and monitoring logs.
 
 ### 6. Maintenance Layer (Rust)
+
 - **Role**: Runs configurable clean-up jobs (`mitm_cleanup`) to purge old processed records according to strict data retention policies.
 
 ---
@@ -101,6 +107,7 @@ flowchart TB
 ## 🛠️ Build and Running Instructions
 
 ### 1. Prerequisites
+
 - Rust 2024 Edition (`cargo`)
 - Go 1.26+ (for Collectors)
 - PostgreSQL Server
@@ -121,7 +128,7 @@ go build -o ../../target/release/mitm-collector-pg main.go
 
 ### 4. Running the Ecosystem
 
-Set the `MASTER_KEY` environment variable and start the core servers:
+Set the `MASTER_KEY` environment variable (**only in your local machine, NOT in prod**) and start the core servers:
 
 ```bash
 export MASTER_KEY="Y29uZmlkZW50aWFsX21hc3Rlcl9rZXlfMzJfYnl0ZXM="
