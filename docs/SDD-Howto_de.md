@@ -1,6 +1,6 @@
 # Entwickler-Guide: SpecDD & GitHub Spec Kit
 
-Willkommen im `mitm-2` Projekt! Wir nutzen eine Kombination aus **SpecDD** (Architektur-Wahrheit) und **GitHub Spec Kit** (Feature-Entwicklung), um das System robust zu halten und gleichzeitig schnell neue Funktionen zu bauen.
+Willkommen im `mitm-3` Projekt! Wir nutzen eine Kombination aus **SpecDD** (Architektur-Wahrheit) und **GitHub Spec Kit** (Feature-Entwicklung), um das System robust zu halten und gleichzeitig schnell neue Funktionen zu bauen.
 Dieser Guide erklärt dir, wie du als Entwickler oder KI-Agent damit im Alltag arbeitest.
 
 ## Warum zwei Frameworks?
@@ -12,7 +12,7 @@ Dieser Guide erklärt dir, wie du als Entwickler oder KI-Agent damit im Alltag a
 
 Da unser System aus mehreren Komponenten mit jeweils eigenen GitHub-Repos besteht (z. B. `mitm_collector_pg`, `mitm_transformation`), orchestrieren wir Feature-Entwicklungen zentral aus dem Root-Repo. Dies verhindert Architektur-Drift und unübersichtliche Pull Requests.
 
-Wir nutzen hierfür Agentic-Befehle (z. B. via Antigravity).
+Wir nutzen hierfür Agentic-Befehle (z. B. via Copilot or Antigravity).
 
 ### 1. Rahmenbedingungen checken (SpecDD lesen)
 
@@ -23,6 +23,7 @@ Bevor du startest, verschaffe dir einen groben Überblick über die `.sdd` Datei
 Bevor Code oder Specs geschrieben werden, wird durch den Agenten ein **Feature-Branch** (z. B. `feature/issue-42`) im betroffenen Repo erstellt.
 
 **Ablageort der Spec:**
+
 - **Schichtübergreifende Features** werden zentral als Spec-Verzeichnis im Root-Repo unter `specs/features/<feature-name>/` angelegt.
 - **Isolierte Features**, die nur eine einzige Komponente betreffen, verbleiben zwingend in den `specs/` Ordnern der jeweiligen Komponenten-Repos (z.B. `delivery-layer/mitm_delivery/specs/...`).
 
@@ -55,9 +56,9 @@ Dieser Schritt ersetzt den traditionellen, fehleranfälligen "Big Bang" Pull Req
 
 ### Beispiel 1: Einen neuen Kafka-Collector hinzufügen
 
-Du möchtest, dass `mitm-2` Daten aus einem Kafka-Topic liest und verschlüsselt.
+Du möchtest, dass `mitm-3` Daten aus einem Kafka-Topic liest und verschlüsselt.
 
-1. **Plan & Specify:** Du nutzt `/speckit.specify` für `feature_kafka_collector`. Der `/speckit.plan` erkennt durch `mitm-2.sdd` sofort: "PII muss per AES-GCM verschlüsselt werden. Master Key via IPC."
+1. **Plan & Specify:** Du nutzt `/speckit.specify` für `feature_kafka_collector`. Der `/speckit.plan` erkennt durch `mitm-3.sdd` sofort: "PII muss per AES-GCM verschlüsselt werden. Master Key via IPC."
 2. **Tasks:** `/speckit.tasks` zerlegt dies: Task 1 (Kafka Reader bauen in `collector-layer/mitm_collector_kafka`), Task 2 (IPC Encryption im Collector einbinden).
 3. **Implement:** Der Agent baut Schritt für Schritt den Code in den richtigen Repos, ohne aus Versehen Hardcoded-Keys einzubauen, da die Tasks ihn an die Spec binden.
 
@@ -70,4 +71,4 @@ Du sollst neue Felder aus einem CSV-Upload verarbeiten.
 
 ---
 
-Mit diesem Flow-Forward Ansatz bleibt das `mitm-2` System auch bei komplexen, schichtübergreifenden Features immer wartbar, sicher und architektonisch sauber!
+Mit diesem Flow-Forward Ansatz bleibt das `mitm-3` System auch bei komplexen, schichtübergreifenden Features immer wartbar, sicher und architektonisch sauber!

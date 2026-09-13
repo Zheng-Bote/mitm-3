@@ -1,6 +1,6 @@
 # Developer Guide: SpecDD & GitHub Spec Kit
 
-Welcome to the `mitm-2` project! We use a combination of **SpecDD** (Architectural source of truth) and **GitHub Spec Kit** (Feature development) to keep the system robust while rapidly building new functions.
+Welcome to the `mitm-3` project! We use a combination of **SpecDD** (Architectural source of truth) and **GitHub Spec Kit** (Feature development) to keep the system robust while rapidly building new functions.
 This guide explains how you, as a developer or AI agent, should work with them on a daily basis.
 
 ## Why Two Frameworks?
@@ -12,17 +12,18 @@ This guide explains how you, as a developer or AI agent, should work with them o
 
 Since our system consists of multiple components with their own GitHub repositories (e.g., `mitm_collector_pg`, `mitm_transformation`), we orchestrate feature development centrally from the root repo. This prevents architectural drift and messy pull requests.
 
-We use Agentic commands (e.g., via Antigravity) for this.
+We use Agentic commands (e.g., via Copilot or Antigravity) for this.
 
 ### 1. Check Constraints (Read SpecDD)
 
-Before starting, get a rough overview of the `.sdd` files (e.g., `mitm-2.sdd` in the root). They tell you what you **must** do and what is absolutely **forbidden**.
+Before starting, get a rough overview of the `.sdd` files (e.g., `mitm-3.sdd` in the root). They tell you what you **must** do and what is absolutely **forbidden**.
 
 ### 2. Specify & Plan (Design Phase)
 
 Before any code or specs are written, the agent creates a **feature branch** (e.g., `feature/issue-42`) in the affected repo.
 
 **Spec Location:**
+
 - **Cross-layer features** are created centrally as a spec directory in the root repo under `specs/features/<feature-name>/`.
 - **Isolated features**, which affect only a single component, must remain strictly in the `specs/` folders of their respective component repos (e.g., `delivery-layer/mitm_delivery/specs/...`).
 
@@ -55,9 +56,9 @@ This step replaces the traditional, error-prone "Big Bang" pull request.
 
 ### Example 1: Adding a New Kafka Collector
 
-You want `mitm-2` to read and encrypt data from a Kafka topic.
+You want `mitm-3` to read and encrypt data from a Kafka topic.
 
-1. **Plan & Specify:** You use `/speckit.specify` for `feature_kafka_collector`. Through `mitm-2.sdd`, `/speckit.plan` immediately recognizes: "PII must be AES-GCM encrypted. Master Key via IPC."
+1. **Plan & Specify:** You use `/speckit.specify` for `feature_kafka_collector`. Through `mitm-3.sdd`, `/speckit.plan` immediately recognizes: "PII must be AES-GCM encrypted. Master Key via IPC."
 2. **Tasks:** `/speckit.tasks` breaks this down: Task 1 (Build Kafka Reader in `collector-layer/mitm_collector_kafka`), Task 2 (Integrate IPC Encryption in the Collector).
 3. **Implement:** The agent incrementally builds the code in the correct repos without accidentally hardcoding keys, since the tasks bind it to the spec.
 
@@ -70,4 +71,4 @@ You need to process new fields from a CSV upload.
 
 ---
 
-With this Flow-Forward approach, the `mitm-2` system remains maintainable, secure, and architecturally clean even for complex, cross-layer features!
+With this Flow-Forward approach, the `mitm-3` system remains maintainable, secure, and architecturally clean even for complex, cross-layer features!
